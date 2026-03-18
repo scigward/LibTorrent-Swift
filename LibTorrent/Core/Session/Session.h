@@ -26,9 +26,6 @@ typedef NS_ENUM(NSUInteger, ErrorCode) {
 - (void)torrentManager:(Session *)manager didRemoveTorrentWithHash:(TorrentHashes *)hashesData;
 - (void)torrentManager:(Session *)manager didReceiveUpdateForTorrent:(TorrentHandle *)torrent;
 - (void)torrentManager:(Session *)manager didErrorOccur:(NSError *)error;
-@optional
-- (void)torrentManager:(Session *)manager didFinishPieceAtIndex:(NSInteger)pieceIndex forTorrent:(TorrentHandle *)torrent;
-- (void)torrentManager:(Session *)manager didReadPieceData:(NSData *)data atIndex:(NSInteger)pieceIndex forTorrent:(TorrentHandle *)torrent;
 @end
 
 @interface StorageModel : NSObject

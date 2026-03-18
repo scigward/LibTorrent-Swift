@@ -56,18 +56,6 @@ lt::settings_pack::proxy_type_t proxyTypeConverter(SessionSettings *pack) {
     settings.set_int(lt::settings_pack::download_rate_limit, (int)_maxDownloadSpeed);
     settings.set_int(lt::settings_pack::upload_rate_limit, (int)_maxUploadSpeed);
 
-    // Streaming settings
-    if (_piecesThresholdForPrioritization > 0)
-        settings.set_int(lt::settings_pack::whole_pieces_threshold, (int)_piecesThresholdForPrioritization);
-    if (_requestTimeout > 0)
-        settings.set_int(lt::settings_pack::request_timeout, (int)_requestTimeout);
-    if (_peerTimeout > 0)
-        settings.set_int(lt::settings_pack::peer_timeout, (int)_peerTimeout);
-    if (_maxConnectionsPerTorrent > 0)
-        settings.set_int(lt::settings_pack::connections_limit, (int)_maxConnectionsPerTorrent);
-    if (_maxUploadsPerTorrent > 0)
-        settings.set_int(lt::settings_pack::unchoke_slots_limit, (int)_maxUploadsPerTorrent);
-
     // Networking protocols
     settings.set_bool(lt::settings_pack::enable_dht, _isDhtEnabled);
     settings.set_bool(lt::settings_pack::enable_lsd, _isLsdEnabled);

@@ -357,52 +357,14 @@
     _torrentHandle.piece_priority(idx, prio);
 }
 
-- (void)setPiecePriorities:(NSArray<NSNumber *> *)priorities fromIndex:(NSInteger)startIndex {
-    for (NSInteger i = 0; i < priorities.count; i++) {
-        auto idx = static_cast<lt::piece_index_t>(static_cast<int>(startIndex + i));
-        auto prio = static_cast<lt::download_priority_t>(priorities[i].unsignedCharValue);
-        _torrentHandle.piece_priority(idx, prio);
-    }
-}
-
 - (void)setPieceDeadline:(NSInteger)pieceIndex deadline:(int)deadline {
     auto idx = static_cast<lt::piece_index_t>(static_cast<int>(pieceIndex));
     _torrentHandle.set_piece_deadline(idx, deadline);
 }
 
-- (void)setPieceDeadlines:(NSArray<NSNumber *> *)deadlines fromIndex:(NSInteger)startIndex {
-    for (NSInteger i = 0; i < deadlines.count; i++) {
-        auto idx = static_cast<lt::piece_index_t>(static_cast<int>(startIndex + i));
-        _torrentHandle.set_piece_deadline(idx, deadlines[i].intValue);
-    }
-}
-
 - (void)resetPieceDeadline:(NSInteger)pieceIndex {
     auto idx = static_cast<lt::piece_index_t>(static_cast<int>(pieceIndex));
     _torrentHandle.reset_piece_deadline(idx);
-}
-
-- (void)clearAllPieceDeadlines {
-    _torrentHandle.clear_piece_deadlines();
-}
-
-- (uint8_t)getPiecePriority:(NSInteger)pieceIndex {
-    auto idx = static_cast<lt::piece_index_t>(static_cast<int>(pieceIndex));
-    return static_cast<uint8_t>(_torrentHandle.piece_priority(idx));
-}
-
-- (NSInteger)numberOfPieces {
-    auto ti = _torrentHandle.torrent_file();
-    if (ti == nullptr) return 0;
-    return ti->num_pieces();
-}
-
-- (void)setTorrentDownloadLimit:(NSInteger)bytesPerSecond {
-    _torrentHandle.set_download_limit(static_cast<int>(bytesPerSecond));
-}
-
-- (void)setTorrentUploadLimit:(NSInteger)bytesPerSecond {
-    _torrentHandle.set_upload_limit(static_cast<int>(bytesPerSecond));
 }
 
 - (void)readPiece:(NSInteger)pieceIndex {
@@ -579,11 +541,9 @@
         snapshot.isStorageMissing = [self isStorageMissing];
 
         snapshot.pieceLength = 0;
-        snapshot.numberOfPieces = 0;
         auto ti = _torrentHandle.torrent_file();
         if (ti != nullptr) {
             snapshot.pieceLength = ti->piece_length();
-            snapshot.numberOfPieces = ti->num_pieces();
         }
 
         self.snapshot = snapshot;

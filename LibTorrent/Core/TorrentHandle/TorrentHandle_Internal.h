@@ -62,7 +62,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readwrite, nullable) NSUUID* storageUUID;
 @property (readwrite) BOOL isStorageMissing;
 @property (readwrite) int pieceLength;
-@property (readwrite) NSInteger numberOfPieces;
 @end
 
 @interface TorrentHandle ()

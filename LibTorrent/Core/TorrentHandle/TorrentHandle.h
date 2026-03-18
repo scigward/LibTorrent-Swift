@@ -67,7 +67,6 @@ NS_SWIFT_NAME(TorrentHandle.Snapshot)
 @property (readonly, nullable) NSUUID* storageUUID;
 @property (readonly) BOOL isStorageMissing;
 @property (readonly) int pieceLength;
-@property (readonly) NSInteger numberOfPieces;
 @end
 
 @interface TorrentHandle : NSObject
@@ -90,18 +89,9 @@ NS_SWIFT_NAME(TorrentHandle.Snapshot)
 - (void)setAllFilesPriority:(FilePriority)priority;
 
 - (void)setPiecePriority:(NSInteger)pieceIndex priority:(uint8_t)priority;
-- (void)setPiecePriorities:(NSArray<NSNumber *> *)priorities fromIndex:(NSInteger)startIndex;
 
 - (void)setPieceDeadline:(NSInteger)pieceIndex deadline:(int)deadline;
-- (void)setPieceDeadlines:(NSArray<NSNumber *> *)deadlines fromIndex:(NSInteger)startIndex;
 - (void)resetPieceDeadline:(NSInteger)pieceIndex;
-- (void)clearAllPieceDeadlines;
-
-- (uint8_t)getPiecePriority:(NSInteger)pieceIndex;
-- (NSInteger)numberOfPieces;
-
-- (void)setTorrentDownloadLimit:(NSInteger)bytesPerSecond;
-- (void)setTorrentUploadLimit:(NSInteger)bytesPerSecond;
 
 - (void)readPiece:(NSInteger)pieceIndex;
 - (void)flushCache;
