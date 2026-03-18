@@ -10,6 +10,7 @@
 #import <LibTorrent/TorrentHandleState.h>
 #import <LibTorrent/TorrentTracker.h>
 #import <LibTorrent/FileEntry.h>
+#import <LibTorrent/TorrentPeerInfo.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -67,6 +68,7 @@ NS_SWIFT_NAME(TorrentHandle.Snapshot)
 @property (readonly, nullable) NSUUID* storageUUID;
 @property (readonly) BOOL isStorageMissing;
 @property (readonly) int pieceLength;
+@property (readonly) NSInteger numberOfPieces;
 @end
 
 @interface TorrentHandle : NSObject
@@ -84,18 +86,36 @@ NS_SWIFT_NAME(TorrentHandle.Snapshot)
 
 - (void)setSequentialDownload:(BOOL)enabled;
 
+/// Enable streaming mode: deselects all pieces (priority 0) and enables sequential download.
+/// Only pieces explicitly prioritized will be downloaded. Disable to restore normal download.
+- (void)setStreamingMode:(BOOL)enabled;
+
 - (void)setFilePriority:(FilePriority)priority at:(NSInteger)fileIndex;
 - (void)setFilesPriority:(FilePriority)priority at:(NSArray<NSNumber *> *)fileIndexes;
 - (void)setAllFilesPriority:(FilePriority)priority;
 
 - (void)setPiecePriority:(NSInteger)pieceIndex priority:(uint8_t)priority;
+/// Set priorities for a contiguous range of pieces starting at startIndex.
+- (void)setPiecePriorities:(NSArray<NSNumber *> *)priorities fromIndex:(NSInteger)startIndex;
 
 - (void)setPieceDeadline:(NSInteger)pieceIndex deadline:(int)deadline;
+/// Set deadlines for a contiguous range of pieces starting at startIndex.
+- (void)setPieceDeadlines:(NSArray<NSNumber *> *)deadlines fromIndex:(NSInteger)startIndex;
 - (void)resetPieceDeadline:(NSInteger)pieceIndex;
+/// Clear all piece deadlines. Useful when seeking during streaming.
+- (void)clearAllPieceDeadlines;
 
 - (void)readPiece:(NSInteger)pieceIndex;
 - (void)flushCache;
 - (void)forceRecheck;
+
+/// Set per-torrent download rate limit in bytes per second. 0 means unlimited.
+- (void)setDownloadLimit:(int)bytesPerSecond;
+/// Set per-torrent upload rate limit in bytes per second. 0 means unlimited.
+- (void)setUploadLimit:(int)bytesPerSecond;
+
+/// Get per-peer information: IP, speeds, client name, progress, connection flags.
+- (NSArray<TorrentPeerInfo *> *)peerInfo;
 
 - (void)addTracker:(NSString *)url;
 - (void)removeTrackers:(NSArray<NSString *> *)urls;

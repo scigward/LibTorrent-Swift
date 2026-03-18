@@ -8,6 +8,7 @@
 #import "TorrentHandle_Internal.h"
 #import "FileEntry_Internal.h"
 #import "TorrentTracker_Internal.h"
+#import "TorrentPeerInfo_Internal.h"
 #import "Session_Internal.h"
 
 #import "NSData+Hex.h"
@@ -15,6 +16,7 @@
 #import "libtorrent/torrent_status.hpp"
 #import "libtorrent/torrent_info.hpp"
 #import "libtorrent/magnet_uri.hpp"
+#import "libtorrent/peer_info.hpp"
 
 @implementation TorrentHashes
 
@@ -351,10 +353,49 @@
     _torrentHandle.save_resume_data();
 }
 
+- (void)setStreamingMode:(BOOL)enabled {
+    if (!_torrentHandle.is_valid()) return;
+
+    if (enabled) {
+        _torrentHandle.set_flags(lt::torrent_flags::sequential_download);
+
+        // Deselect all pieces (priority 0 = don't download)
+        auto ti = _torrentHandle.torrent_file();
+        if (ti != nullptr) {
+            int numPieces = ti->num_pieces();
+            for (int i = 0; i < numPieces; i++) {
+                auto idx = static_cast<lt::piece_index_t>(i);
+                _torrentHandle.piece_priority(idx, lt::dont_download);
+            }
+        }
+    } else {
+        _torrentHandle.unset_flags(lt::torrent_flags::sequential_download);
+
+        // Restore all pieces to default priority
+        auto ti = _torrentHandle.torrent_file();
+        if (ti != nullptr) {
+            int numPieces = ti->num_pieces();
+            for (int i = 0; i < numPieces; i++) {
+                auto idx = static_cast<lt::piece_index_t>(i);
+                _torrentHandle.piece_priority(idx, lt::default_priority);
+            }
+        }
+    }
+    _torrentHandle.save_resume_data();
+}
+
 - (void)setPiecePriority:(NSInteger)pieceIndex priority:(uint8_t)priority {
     auto idx = static_cast<lt::piece_index_t>(static_cast<int>(pieceIndex));
     auto prio = static_cast<lt::download_priority_t>(priority);
     _torrentHandle.piece_priority(idx, prio);
+}
+
+- (void)setPiecePriorities:(NSArray<NSNumber *> *)priorities fromIndex:(NSInteger)startIndex {
+    for (NSInteger i = 0; i < priorities.count; i++) {
+        auto idx = static_cast<lt::piece_index_t>(static_cast<int>(startIndex + i));
+        auto prio = static_cast<lt::download_priority_t>(priorities[i].unsignedCharValue);
+        _torrentHandle.piece_priority(idx, prio);
+    }
 }
 
 - (void)setPieceDeadline:(NSInteger)pieceIndex deadline:(int)deadline {
@@ -362,9 +403,20 @@
     _torrentHandle.set_piece_deadline(idx, deadline);
 }
 
+- (void)setPieceDeadlines:(NSArray<NSNumber *> *)deadlines fromIndex:(NSInteger)startIndex {
+    for (NSInteger i = 0; i < deadlines.count; i++) {
+        auto idx = static_cast<lt::piece_index_t>(static_cast<int>(startIndex + i));
+        _torrentHandle.set_piece_deadline(idx, deadlines[i].intValue);
+    }
+}
+
 - (void)resetPieceDeadline:(NSInteger)pieceIndex {
     auto idx = static_cast<lt::piece_index_t>(static_cast<int>(pieceIndex));
     _torrentHandle.reset_piece_deadline(idx);
+}
+
+- (void)clearAllPieceDeadlines {
+    _torrentHandle.clear_piece_deadlines();
 }
 
 - (void)readPiece:(NSInteger)pieceIndex {
@@ -378,6 +430,42 @@
 
 - (void)forceRecheck {
     _torrentHandle.force_recheck();
+}
+
+- (void)setDownloadLimit:(int)bytesPerSecond {
+    _torrentHandle.set_download_limit(bytesPerSecond);
+}
+
+- (void)setUploadLimit:(int)bytesPerSecond {
+    _torrentHandle.set_upload_limit(bytesPerSecond);
+}
+
+- (NSArray<TorrentPeerInfo *> *)peerInfo {
+    std::vector<lt::peer_info> peers;
+    _torrentHandle.get_peer_info(peers);
+
+    NSMutableArray *results = [[NSMutableArray alloc] init];
+    for (const auto &peer : peers) {
+        TorrentPeerInfo *info = [[TorrentPeerInfo alloc] init];
+        info.ip = [NSString stringWithUTF8String:peer.ip.address().to_string().c_str()];
+        info.port = peer.ip.port();
+        info.client = [NSString stringWithUTF8String:peer.client.c_str()];
+        info.progress = peer.progress;
+        info.totalDownload = peer.total_download;
+        info.totalUpload = peer.total_upload;
+        info.downSpeed = peer.down_speed;
+        info.upSpeed = peer.up_speed;
+        info.payloadDownSpeed = peer.payload_down_speed;
+        info.payloadUpSpeed = peer.payload_up_speed;
+        info.isSeed = static_cast<bool>(peer.flags & lt::peer_info::seed);
+        info.isIncoming = !static_cast<bool>(peer.flags & lt::peer_info::outgoing_connection);
+        info.isUTP = static_cast<bool>(peer.flags & lt::peer_info::utp_socket);
+        info.isEncrypted = static_cast<bool>(peer.flags & lt::peer_info::rc4_encrypted)
+                        || static_cast<bool>(peer.flags & lt::peer_info::plaintext_encrypted);
+        info.connectionType = static_cast<int>(peer.connection_type);
+        [results addObject:info];
+    }
+    return [results copy];
 }
 
 - (NSArray<FileEntry *> *)filesFromStatus: (lt::torrent_status)stat {
@@ -541,9 +629,11 @@
         snapshot.isStorageMissing = [self isStorageMissing];
 
         snapshot.pieceLength = 0;
+        snapshot.numberOfPieces = 0;
         auto ti = _torrentHandle.torrent_file();
         if (ti != nullptr) {
             snapshot.pieceLength = ti->piece_length();
+            snapshot.numberOfPieces = ti->num_pieces();
         }
 
         self.snapshot = snapshot;
