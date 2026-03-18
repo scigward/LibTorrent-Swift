@@ -259,6 +259,14 @@
     return static_cast<bool>(ts.flags & lt::torrent_flags::sequential_download);
 }
 
+- (BOOL)isPrivateFromTorrentFile {
+    auto ti = _torrentHandle.torrent_file();
+    if (ti != nullptr) {
+        return ti->priv();
+    }
+    return NO;
+}
+
 - (NSArray<NSNumber *> *)piecesFromStatus: (lt::torrent_status)stat {
     auto info = _torrentHandle.torrent_file().get();
 
@@ -463,6 +471,7 @@
         info.isEncrypted = static_cast<bool>(peer.flags & lt::peer_info::rc4_encrypted)
                         || static_cast<bool>(peer.flags & lt::peer_info::plaintext_encrypted);
         info.connectionType = static_cast<int>(peer.connection_type);
+        info.lastActive = (NSTimeInterval)peer.last_active;
         [results addObject:info];
     }
     return [results copy];
@@ -620,6 +629,8 @@
         snapshot.isFinished = [self isFinishedFromStatus:stat];
         snapshot.isSeed = [self isSeedFromStatus:stat];
         snapshot.isSequential = [self isSequentialFromStatus:stat];
+        snapshot.isPrivate = [self isPrivateFromTorrentFile];
+        snapshot.activeTime = (NSTimeInterval)stat.active_time;
 
         // Compute ETA
         uint64_t remainingBytes = snapshot.totalWanted > snapshot.totalWantedDone

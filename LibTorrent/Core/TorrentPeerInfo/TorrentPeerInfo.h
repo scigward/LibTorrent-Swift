@@ -39,6 +39,9 @@ NS_SWIFT_NAME(TorrentHandle.PeerInfo)
 @property (readonly, nonatomic) BOOL isEncrypted;
 /// Connection type: 0=standard_bittorrent, 1=web_seed, 2=http_seed
 @property (readonly, nonatomic) int connectionType;
+/// Seconds since the last time we exchanged data with this peer.
+/// Corresponds to Hayase's PeerInfo.time.
+@property (readonly, nonatomic) NSTimeInterval lastActive;
 @end
 
 NS_ASSUME_NONNULL_END

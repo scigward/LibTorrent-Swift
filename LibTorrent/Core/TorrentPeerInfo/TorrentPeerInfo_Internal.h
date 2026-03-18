@@ -23,6 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readwrite, nonatomic) BOOL isUTP;
 @property (readwrite, nonatomic) BOOL isEncrypted;
 @property (readwrite, nonatomic) int connectionType;
+@property (readwrite, nonatomic) NSTimeInterval lastActive;
 @end
 
 NS_ASSUME_NONNULL_END

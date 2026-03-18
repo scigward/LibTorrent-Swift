@@ -59,9 +59,14 @@ NS_SWIFT_NAME(TorrentHandle.Snapshot)
 @property (readonly) BOOL isFinished;
 @property (readonly) BOOL isSeed;
 @property (readonly) BOOL isSequential;
+/// Whether the torrent is marked as private (no PeX or DHT for this torrent).
+@property (readonly) BOOL isPrivate;
 /// Estimated time remaining to complete the download, in seconds.
 /// Returns 0 if the download is complete, or -1 if the rate is too low to estimate.
 @property (readonly) NSTimeInterval timeRemaining;
+/// Seconds the torrent has been in an active (downloading/seeding) state.
+/// Corresponds to Hayase's TorrentInfo.time.elapsed.
+@property (readonly) NSTimeInterval activeTime;
 @property (readonly, nullable) NSArray<NSNumber *> *pieces;
 @property (readonly) NSArray<FileEntry *> *files;
 @property (readonly) NSArray<TorrentTracker *> *trackers;
