@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readwrite, strong, nonatomic) NSString *path;
 @property (readwrite, nonatomic) uint64_t size;
 @property (readwrite, nonatomic) uint64_t downloaded;
+@property (readwrite, nonatomic) double progress;
 @property (readwrite, nonatomic) FilePriority priority;
 @property (readwrite, nonatomic) uint64_t begin_idx;
 @property (readwrite, nonatomic) uint64_t end_idx;

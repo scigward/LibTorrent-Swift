@@ -66,7 +66,9 @@ std::unordered_map<lt::sha1_hash, std::unordered_map<std::string, std::unordered
         // Enabling plugins
         _session->add_extension(&lt::create_smart_ban_plugin);
         _session->add_extension(&lt::create_ut_metadata_plugin);
-        _session->add_extension(&lt::create_ut_pex_plugin);
+        if (_settings.isPexEnabled) {
+            _session->add_extension(&lt::create_ut_pex_plugin);
+        }
 
         // Init session properties
         _filesQueue = dispatch_queue_create([FileEntriesQueueIdentifier UTF8String], DISPATCH_QUEUE_SERIAL);

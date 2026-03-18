@@ -59,6 +59,9 @@ NS_SWIFT_NAME(TorrentHandle.Snapshot)
 @property (readonly) BOOL isFinished;
 @property (readonly) BOOL isSeed;
 @property (readonly) BOOL isSequential;
+/// Estimated time remaining to complete the download, in seconds.
+/// Returns 0 if the download is complete, or -1 if the rate is too low to estimate.
+@property (readonly) NSTimeInterval timeRemaining;
 @property (readonly, nullable) NSArray<NSNumber *> *pieces;
 @property (readonly) NSArray<FileEntry *> *files;
 @property (readonly) NSArray<TorrentTracker *> *trackers;

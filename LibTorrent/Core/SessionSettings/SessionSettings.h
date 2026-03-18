@@ -37,11 +37,19 @@ NS_SWIFT_NAME(Session.Settings)
 @property (readwrite, nonatomic) NSUInteger maxDownloadSpeed;
 @property (readwrite, nonatomic) NSUInteger maxUploadSpeed;
 
+/// Maximum number of connections the session will allow globally. 0 means unlimited.
+@property (readwrite, nonatomic) NSInteger maxConnections;
+
 @property (readwrite, nonatomic) BOOL isDhtEnabled;
+/// Port used by the DHT. If 0 (the default), the same port as the BitTorrent listen port is used.
+@property (readwrite, nonatomic) NSInteger dhtPort;
 @property (readwrite, nonatomic) BOOL isLsdEnabled;
 @property (readwrite, nonatomic) BOOL isUtpEnabled;
 @property (readwrite, nonatomic) BOOL isUpnpEnabled;
 @property (readwrite, nonatomic) BOOL isNatEnabled;
+/// Enable/disable the PeX (Peer Exchange) extension. Defaults to YES.
+/// Note: this must be set before the session is created; changing it later has no effect.
+@property (readwrite, nonatomic) BOOL isPexEnabled;
 
 @property (readwrite, nonatomic) SessionSettingsEncryptionPolicy encryptionPolicy;
 @property (readwrite, nonatomic) BOOL validateHttpsTrackers;

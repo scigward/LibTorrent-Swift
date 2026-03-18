@@ -53,6 +53,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readwrite) BOOL isFinished;
 @property (readwrite) BOOL isSeed;
 @property (readwrite) BOOL isSequential;
+@property (readwrite) NSTimeInterval timeRemaining;
 @property (readwrite) NSArray<NSNumber *> *pieces;
 @property (readwrite) NSArray<FileEntry *> *files;
 @property (readwrite) NSArray<TorrentTracker *> *trackers;

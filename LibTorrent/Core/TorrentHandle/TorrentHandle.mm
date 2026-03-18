@@ -498,6 +498,7 @@
         fileEntry.path = [NSString stringWithUTF8String:path.c_str()];
         fileEntry.size = size;
         fileEntry.downloaded = progresses[index];
+        fileEntry.progress = size > 0 ? (double)progresses[index] / (double)size : 0.0;
         fileEntry.priority = (FilePriority) priority;
 
         const auto fileSize = files.file_size(i);// > 0 ? files.file_size(i) : 0;
@@ -619,6 +620,19 @@
         snapshot.isFinished = [self isFinishedFromStatus:stat];
         snapshot.isSeed = [self isSeedFromStatus:stat];
         snapshot.isSequential = [self isSequentialFromStatus:stat];
+
+        // Compute ETA
+        uint64_t remainingBytes = snapshot.totalWanted > snapshot.totalWantedDone
+            ? snapshot.totalWanted - snapshot.totalWantedDone
+            : 0;
+        if (remainingBytes == 0) {
+            snapshot.timeRemaining = 0;
+        } else if (snapshot.downloadRate > 0) {
+            snapshot.timeRemaining = (NSTimeInterval)remainingBytes / (double)snapshot.downloadRate;
+        } else {
+            snapshot.timeRemaining = -1; // Unknown / stalled
+        }
+
         snapshot.pieces = [self piecesFromStatus:stat];
         snapshot.files = [self filesFromStatus:stat];
         snapshot.trackers = [self trackers];

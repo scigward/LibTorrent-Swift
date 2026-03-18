@@ -35,6 +35,7 @@ lt::settings_pack::proxy_type_t proxyTypeConverter(SessionSettings *pack) {
 
     if (self) {
         _preallocateStorage = false;
+        _isPexEnabled = YES;
     }
 
     return self;
@@ -55,9 +56,15 @@ lt::settings_pack::proxy_type_t proxyTypeConverter(SessionSettings *pack) {
     // Speed limitations
     settings.set_int(lt::settings_pack::download_rate_limit, (int)_maxDownloadSpeed);
     settings.set_int(lt::settings_pack::upload_rate_limit, (int)_maxUploadSpeed);
+    if (_maxConnections > 0) {
+        settings.set_int(lt::settings_pack::connections_limit, (int)_maxConnections);
+    }
 
     // Networking protocols
     settings.set_bool(lt::settings_pack::enable_dht, _isDhtEnabled);
+    if (_dhtPort > 0) {
+        settings.set_int(lt::settings_pack::dht_port, (int)_dhtPort);
+    }
     settings.set_bool(lt::settings_pack::enable_lsd, _isLsdEnabled);
     settings.set_bool(lt::settings_pack::enable_incoming_utp, _isUtpEnabled);
     settings.set_bool(lt::settings_pack::enable_outgoing_utp, _isUtpEnabled);
