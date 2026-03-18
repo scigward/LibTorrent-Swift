@@ -513,8 +513,8 @@ std::unordered_map<lt::sha1_hash, std::unordered_map<std::string, std::unordered
 
 -(void)handleExternalIPAlert:(lt::external_ip_alert *)alert {
     auto externalIP = [[NSString alloc] initWithUTF8String: alert->external_address.to_string().c_str()];
-    if (_lastExternalIP != externalIP) {
-        if (_lastExternalIP != NULL) // Probably need add isReannounceWhenAddressChangedEnabled setting
+    if (![_lastExternalIP isEqualToString:externalIP]) {
+        if (_lastExternalIP != nil) // Probably need add isReannounceWhenAddressChangedEnabled setting
             [self reannounceToAllTrackers];
         _lastExternalIP = externalIP;
         if (externalIP) {
