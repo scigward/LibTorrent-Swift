@@ -18,6 +18,8 @@
 #import "libtorrent/magnet_uri.hpp"
 #import "libtorrent/peer_info.hpp"
 
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
+
 @implementation TorrentHashes
 
 #if LIBTORRENT_VERSION_MAJOR > 1
@@ -448,6 +450,10 @@
     _torrentHandle.set_upload_limit(bytesPerSecond);
 }
 
+- (void)setConnectionsLimit:(int)maxConnections {
+    _torrentHandle.set_max_connections(maxConnections);
+}
+
 - (NSArray<TorrentPeerInfo *> *)peerInfo {
     std::vector<lt::peer_info> peers;
     _torrentHandle.get_peer_info(peers);
@@ -525,6 +531,14 @@
             [array addObject: [NSNumber numberWithBool: stat.pieces.get_bit(index)]];
         }
         fileEntry.pieces = array;
+
+        NSString *ext = fileEntry.name.pathExtension.lowercaseString;
+        if (ext.length > 0) {
+            if (@available(iOS 14.0, macOS 11.0, *)) {
+                UTType *utType = [UTType typeWithFilenameExtension:ext];
+                fileEntry.mimeType = utType ? utType.preferredMIMEType : nil;
+            }
+        }
 
         [results addObject:fileEntry];
     }
@@ -630,7 +644,11 @@
         snapshot.isSeed = [self isSeedFromStatus:stat];
         snapshot.isSequential = [self isSequentialFromStatus:stat];
         snapshot.isPrivate = [self isPrivateFromTorrentFile];
+        snapshot.isAutoManaged = static_cast<bool>(stat.flags & lt::torrent_flags::auto_managed);
         snapshot.activeTime = (NSTimeInterval)stat.active_time;
+        snapshot.connectCandidates = stat.connect_candidates;
+        snapshot.downloadLimit = _torrentHandle.download_limit();
+        snapshot.uploadLimit = _torrentHandle.upload_limit();
 
         // Compute ETA
         uint64_t remainingBytes = snapshot.totalWanted > snapshot.totalWantedDone

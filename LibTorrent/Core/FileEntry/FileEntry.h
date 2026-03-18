@@ -25,6 +25,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly, nonatomic) uint64_t end_idx;
 @property (readonly, nonatomic) NSInteger num_pieces;
 @property (readonly, nonatomic) NSArray<NSNumber *> *pieces;
+/// MIME type derived from the file extension (e.g. "video/x-matroska", "video/mp4").
+/// Corresponds to Hayase's TorrentFile.type. Nil if the type cannot be determined.
+@property (readonly, strong, nonatomic, nullable) NSString *mimeType;
 @end
 
 NS_ASSUME_NONNULL_END

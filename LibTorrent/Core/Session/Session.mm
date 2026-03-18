@@ -111,6 +111,14 @@ std::unordered_map<lt::sha1_hash, std::unordered_map<std::string, std::unordered
     }
 }
 
+- (int64_t)availableDiskSpaceAtPath:(NSString *)path {
+    NSError *error;
+    NSDictionary *attrs = [[NSFileManager defaultManager] attributesOfFileSystemForPath:path error:&error];
+    if (error || !attrs) return -1;
+    NSNumber *freeSpace = attrs[NSFileSystemFreeSize];
+    return freeSpace ? (int64_t)freeSpace.unsignedLongLongValue : -1;
+}
+
 - (void)dealloc {
     delete _session;
 }
@@ -509,8 +517,14 @@ std::unordered_map<lt::sha1_hash, std::unordered_map<std::string, std::unordered
         if (_lastExternalIP != NULL) // Probably need add isReannounceWhenAddressChangedEnabled setting
             [self reannounceToAllTrackers];
         _lastExternalIP = externalIP;
+        if (externalIP) {
+            for (id<SessionDelegate> delegate in self.delegates) {
+                if ([delegate respondsToSelector:@selector(torrentManager:didUpdateExternalIP:)]) {
+                    [delegate torrentManager:self didUpdateExternalIP:externalIP];
+                }
+            }
+        }
     }
-
 }
 
 - (void)torrentRemoved:(lt::torrent_handle)handle {

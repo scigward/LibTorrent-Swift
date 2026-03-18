@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readwrite, nonatomic) uint64_t end_idx;
 @property (readwrite, nonatomic) NSInteger num_pieces;
 @property (readwrite, nonatomic) NSArray<NSNumber *> *pieces;
+@property (readwrite, strong, nonatomic, nullable) NSString *mimeType;
 @end
 
 NS_ASSUME_NONNULL_END

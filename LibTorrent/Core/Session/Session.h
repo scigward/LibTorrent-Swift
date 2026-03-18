@@ -31,6 +31,9 @@ typedef NS_ENUM(NSUInteger, ErrorCode) {
 - (void)torrentManager:(Session *)manager didFinishPieceAtIndex:(NSInteger)pieceIndex forTorrent:(TorrentHandle *)torrent;
 /// Called when piece data requested via -[TorrentHandle readPiece:] is available.
 - (void)torrentManager:(Session *)manager didReadPieceData:(NSData *)data atIndex:(NSInteger)pieceIndex forTorrent:(TorrentHandle *)torrent;
+/// Called when the session detects a new external (WAN) IP address.
+/// Corresponds to Hayase's internal IP-change detection that triggers reannounce.
+- (void)torrentManager:(Session *)manager didUpdateExternalIP:(NSString *)externalIP;
 @end
 
 @interface StorageModel : NSObject
@@ -72,6 +75,10 @@ typedef NS_ENUM(NSUInteger, ErrorCode) {
 - (void)removeTorrent:(TorrentHandle *)torrent deleteFiles:(BOOL)deleteFiles;
 
 - (void)reannounceToAllTrackers;
+
+/// Returns available disk space in bytes at the given path, or -1 on error.
+/// Corresponds to Hayase's checkAvailableSpace().
+- (int64_t)availableDiskSpaceAtPath:(NSString *)path;
 
 - (void)pause;
 - (void)resume;

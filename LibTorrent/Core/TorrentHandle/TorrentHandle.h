@@ -61,12 +61,21 @@ NS_SWIFT_NAME(TorrentHandle.Snapshot)
 @property (readonly) BOOL isSequential;
 /// Whether the torrent is marked as private (no PeX or DHT for this torrent).
 @property (readonly) BOOL isPrivate;
+/// Whether libtorrent is auto-managing this torrent (queuing, seeding decisions).
+@property (readonly) BOOL isAutoManaged;
 /// Estimated time remaining to complete the download, in seconds.
 /// Returns 0 if the download is complete, or -1 if the rate is too low to estimate.
 @property (readonly) NSTimeInterval timeRemaining;
 /// Seconds the torrent has been in an active (downloading/seeding) state.
 /// Corresponds to Hayase's TorrentInfo.time.elapsed.
 @property (readonly) NSTimeInterval activeTime;
+/// Number of peers in the connection pool not yet connected (DHT/tracker candidates).
+/// Hayase's TorrentInfo.peers.wires ≈ numberOfPeers + connectCandidates.
+@property (readonly) NSInteger connectCandidates;
+/// Current per-torrent download rate limit in bytes per second. 0 = unlimited.
+@property (readonly) int downloadLimit;
+/// Current per-torrent upload rate limit in bytes per second. 0 = unlimited.
+@property (readonly) int uploadLimit;
 @property (readonly, nullable) NSArray<NSNumber *> *pieces;
 @property (readonly) NSArray<FileEntry *> *files;
 @property (readonly) NSArray<TorrentTracker *> *trackers;
@@ -121,6 +130,9 @@ NS_SWIFT_NAME(TorrentHandle.Snapshot)
 - (void)setDownloadLimit:(int)bytesPerSecond;
 /// Set per-torrent upload rate limit in bytes per second. 0 means unlimited.
 - (void)setUploadLimit:(int)bytesPerSecond;
+/// Set per-torrent maximum number of connections. 0 means unlimited.
+/// Useful for streaming mode to conserve bandwidth from peer connections.
+- (void)setConnectionsLimit:(int)maxConnections;
 
 /// Get per-peer information: IP, speeds, client name, progress, connection flags.
 - (NSArray<TorrentPeerInfo *> *)peerInfo;

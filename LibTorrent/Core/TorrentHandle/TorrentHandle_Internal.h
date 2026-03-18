@@ -54,8 +54,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readwrite) BOOL isSeed;
 @property (readwrite) BOOL isSequential;
 @property (readwrite) BOOL isPrivate;
+@property (readwrite) BOOL isAutoManaged;
 @property (readwrite) NSTimeInterval timeRemaining;
 @property (readwrite) NSTimeInterval activeTime;
+@property (readwrite) NSInteger connectCandidates;
+@property (readwrite) int downloadLimit;
+@property (readwrite) int uploadLimit;
 @property (readwrite) NSArray<NSNumber *> *pieces;
 @property (readwrite) NSArray<FileEntry *> *files;
 @property (readwrite) NSArray<TorrentTracker *> *trackers;
