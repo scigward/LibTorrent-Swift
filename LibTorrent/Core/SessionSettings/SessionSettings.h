@@ -37,6 +37,13 @@ NS_SWIFT_NAME(Session.Settings)
 @property (readwrite, nonatomic) NSUInteger maxDownloadSpeed;
 @property (readwrite, nonatomic) NSUInteger maxUploadSpeed;
 
+// Streaming settings
+@property (readwrite, nonatomic) NSInteger piecesThresholdForPrioritization;
+@property (readwrite, nonatomic) NSInteger requestTimeout;
+@property (readwrite, nonatomic) NSInteger peerTimeout;
+@property (readwrite, nonatomic) NSInteger maxConnectionsPerTorrent;
+@property (readwrite, nonatomic) NSInteger maxUploadsPerTorrent;
+
 @property (readwrite, nonatomic) BOOL isDhtEnabled;
 @property (readwrite, nonatomic) BOOL isLsdEnabled;
 @property (readwrite, nonatomic) BOOL isUtpEnabled;

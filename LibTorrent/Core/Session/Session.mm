@@ -265,6 +265,14 @@ std::unordered_map<lt::sha1_hash, std::unordered_map<std::string, std::unordered
                         case lt::block_finished_alert::alert_type: {
                         } break;
 
+                        case lt::piece_finished_alert::alert_type: {
+                            [self pieceFinishedAlert:(lt::piece_finished_alert *)alert];
+                        } break;
+
+                        case lt::read_piece_alert::alert_type: {
+                            [self readPieceCompletedAlert:(lt::read_piece_alert *)alert];
+                        } break;
+
                         case lt::add_torrent_alert::alert_type: {
                             [self torrentAddedAlert:(lt::torrent_alert *)alert];
                         } break;
@@ -487,6 +495,55 @@ std::unordered_map<lt::sha1_hash, std::unordered_map<std::string, std::unordered
 - (void)torrentStateChanged:(lt::torrent_alert *)alert {
 //    auto th = alert->handle;
 //    if (!th.is_valid()) return;
+}
+
+- (void)pieceFinishedAlert:(lt::piece_finished_alert *)alert {
+    auto th = alert->handle;
+    if (!th.is_valid()) return;
+
+    NSInteger pieceIndex = static_cast<int>(alert->piece_index);
+
+#if LIBTORRENT_VERSION_MAJOR > 1
+    auto ih = th.info_hashes();
+#else
+    auto ih = th.info_hash();
+#endif
+
+    auto hashes = [[TorrentHashes alloc] initWith:ih];
+    auto torrent = _torrentsMap[hashes];
+    if (torrent == NULL) return;
+
+    for (id<SessionDelegate> delegate in self.delegates) {
+        if ([delegate respondsToSelector:@selector(torrentManager:didFinishPieceAtIndex:forTorrent:)]) {
+            [delegate torrentManager:self didFinishPieceAtIndex:pieceIndex forTorrent:torrent];
+        }
+    }
+}
+
+- (void)readPieceCompletedAlert:(lt::read_piece_alert *)alert {
+    auto th = alert->handle;
+    if (!th.is_valid()) return;
+
+    if (alert->error) return;
+
+    NSInteger pieceIndex = static_cast<int>(alert->piece);
+    NSData *data = [NSData dataWithBytes:alert->buffer.get() length:alert->size];
+
+#if LIBTORRENT_VERSION_MAJOR > 1
+    auto ih = th.info_hashes();
+#else
+    auto ih = th.info_hash();
+#endif
+
+    auto hashes = [[TorrentHashes alloc] initWith:ih];
+    auto torrent = _torrentsMap[hashes];
+    if (torrent == NULL) return;
+
+    for (id<SessionDelegate> delegate in self.delegates) {
+        if ([delegate respondsToSelector:@selector(torrentManager:didReadPieceData:atIndex:forTorrent:)]) {
+            [delegate torrentManager:self didReadPieceData:data atIndex:pieceIndex forTorrent:torrent];
+        }
+    }
 }
 
 - (void)torrentInputOutputError:(lt::torrent_alert *)alert {
