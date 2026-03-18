@@ -21,6 +21,7 @@ FOUNDATION_EXPORT const unsigned char LibTorrentVersionString[];
 #import <LibTorrent/TorrentTracker.h>
 #import <LibTorrent/TorrentHandle.h>
 #import <LibTorrent/TorrentHandleState.h>
+#import <LibTorrent/TorrentPeerInfo.h>
 #import <LibTorrent/Downloadable.h>
 #import <LibTorrent/TorrentFile.h>
 #import <LibTorrent/MagnetURI.h>

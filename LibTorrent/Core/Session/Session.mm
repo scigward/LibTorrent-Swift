@@ -328,6 +328,24 @@ std::unordered_map<lt::sha1_hash, std::unordered_map<std::string, std::unordered
 
                         } break;
 
+                        case lt::piece_finished_alert::alert_type: {
+                            auto *a = static_cast<lt::piece_finished_alert *>(alert);
+                            auto th = a->handle;
+                            if (!th.is_valid()) { continue; }
+                            [self notifyDelegatesWithPieceFinished:a->piece_index forHandle:th];
+                            continue;
+                        } break;
+
+                        case lt::read_piece_alert::alert_type: {
+                            auto *a = static_cast<lt::read_piece_alert *>(alert);
+                            if (a->ec) { continue; } // skip errors
+                            auto th = a->handle;
+                            if (!th.is_valid()) { continue; }
+                            NSData *data = [NSData dataWithBytes:a->buffer.get() length:a->size];
+                            [self notifyDelegatesWithPieceData:data atIndex:a->piece forHandle:th];
+                            continue;
+                        } break;
+
                             // Skip log alerts
                         case lt::log_alert::alert_type: {
                             continue;
@@ -388,24 +406,51 @@ std::unordered_map<lt::sha1_hash, std::unordered_map<std::string, std::unordered
     }
 }
 
-- (void)notifyDelegatesWithUpdate:(lt::torrent_handle)th {
-    if (!th.is_valid()) return;
-
+- (TorrentHandle *)torrentForHandle:(lt::torrent_handle)th {
 #if LIBTORRENT_VERSION_MAJOR > 1
     auto ih = th.info_hashes();
 #else
     auto ih = th.info_hash();
 #endif
-
     auto hashes = [[TorrentHashes alloc] initWith:ih];
-    
     auto torrent = _torrentsMap[hashes];
     if (torrent == NULL) {
         torrent = [[TorrentHandle alloc] initWith:th inSession:self];
     }
+    return torrent;
+}
+
+- (void)notifyDelegatesWithUpdate:(lt::torrent_handle)th {
+    if (!th.is_valid()) return;
+
+    auto torrent = [self torrentForHandle:th];
 
     for (id<SessionDelegate>delegate in self.delegates) {
         [delegate torrentManager:self didReceiveUpdateForTorrent:torrent];
+    }
+}
+
+- (void)notifyDelegatesWithPieceFinished:(lt::piece_index_t)pieceIndex forHandle:(lt::torrent_handle)th {
+    if (!th.is_valid()) return;
+
+    auto torrent = [self torrentForHandle:th];
+
+    for (id<SessionDelegate>delegate in self.delegates) {
+        if ([delegate respondsToSelector:@selector(torrentManager:didFinishPieceAtIndex:forTorrent:)]) {
+            [delegate torrentManager:self didFinishPieceAtIndex:static_cast<NSInteger>(pieceIndex) forTorrent:torrent];
+        }
+    }
+}
+
+- (void)notifyDelegatesWithPieceData:(NSData *)data atIndex:(lt::piece_index_t)pieceIndex forHandle:(lt::torrent_handle)th {
+    if (!th.is_valid()) return;
+
+    auto torrent = [self torrentForHandle:th];
+
+    for (id<SessionDelegate>delegate in self.delegates) {
+        if ([delegate respondsToSelector:@selector(torrentManager:didReadPieceData:atIndex:forTorrent:)]) {
+            [delegate torrentManager:self didReadPieceData:data atIndex:static_cast<NSInteger>(pieceIndex) forTorrent:torrent];
+        }
     }
 }
 

@@ -26,6 +26,11 @@ typedef NS_ENUM(NSUInteger, ErrorCode) {
 - (void)torrentManager:(Session *)manager didRemoveTorrentWithHash:(TorrentHashes *)hashesData;
 - (void)torrentManager:(Session *)manager didReceiveUpdateForTorrent:(TorrentHandle *)torrent;
 - (void)torrentManager:(Session *)manager didErrorOccur:(NSError *)error;
+@optional
+/// Called when a piece has been fully downloaded and verified. Useful for streaming playback progress.
+- (void)torrentManager:(Session *)manager didFinishPieceAtIndex:(NSInteger)pieceIndex forTorrent:(TorrentHandle *)torrent;
+/// Called when piece data requested via -[TorrentHandle readPiece:] is available.
+- (void)torrentManager:(Session *)manager didReadPieceData:(NSData *)data atIndex:(NSInteger)pieceIndex forTorrent:(TorrentHandle *)torrent;
 @end
 
 @interface StorageModel : NSObject
