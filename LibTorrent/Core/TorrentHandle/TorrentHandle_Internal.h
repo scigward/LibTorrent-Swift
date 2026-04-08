@@ -53,6 +53,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readwrite) BOOL isFinished;
 @property (readwrite) BOOL isSeed;
 @property (readwrite) BOOL isSequential;
+@property (readwrite) BOOL isFirstLastPiecePriority;
 @property (readwrite) NSArray<NSNumber *> *pieces;
 @property (readwrite) NSArray<FileEntry *> *files;
 @property (readwrite) NSArray<TorrentTracker *> *trackers;
@@ -77,6 +78,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSString *sessionDownloadPath;
 @property Session *session;
 
+@property (readwrite) BOOL isFirstLastPiecePriority;
 @property (readwrite, nullable) NSUUID* storageUUID;
 @property (readwrite) TorrentHandleSnapshot* snapshot;
 
@@ -87,6 +89,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable) NSString *cachedTorrentFilePath;
 
 - (instancetype)initWith:(lt::torrent_handle)torrentHandle inSession:(Session *)session;
+- (void)applyPriorityConfiguration;
+- (void)applyPriorityConfigurationWithFilePriorities:(const std::vector<lt::download_priority_t> &)filePriorities
+                                      saveResumeData:(BOOL)saveResumeData;
 @end
 
 

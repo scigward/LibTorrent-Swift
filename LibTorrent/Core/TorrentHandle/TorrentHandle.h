@@ -59,6 +59,7 @@ NS_SWIFT_NAME(TorrentHandle.Snapshot)
 @property (readonly) BOOL isFinished;
 @property (readonly) BOOL isSeed;
 @property (readonly) BOOL isSequential;
+@property (readonly) BOOL isFirstLastPiecePriority;
 @property (readonly, nullable) NSArray<NSNumber *> *pieces;
 @property (readonly) NSArray<FileEntry *> *files;
 @property (readonly) NSArray<TorrentTracker *> *trackers;
@@ -91,6 +92,7 @@ NS_SWIFT_NAME(TorrentHandle.Snapshot)
 - (void)reload;
 
 - (void)setSequentialDownload:(BOOL)enabled;
+- (void)setFirstLastPriorityDownload:(BOOL)enabled;
 
 - (void)setFilePriority:(FilePriority)priority at:(NSInteger)fileIndex;
 - (void)setFilesPriority:(FilePriority)priority at:(NSArray<NSNumber *> *)fileIndexes;

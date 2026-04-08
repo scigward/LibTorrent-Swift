@@ -420,6 +420,16 @@ static NSString *FileEntriesQueueIdentifier = @"ru.xitrix.TorrentKit.Session.fil
     if (th.status().has_metadata) {
         [self saveTorrentFileWithInfo:info];
         [self removeMagnetURIWithHash:th.info_hash()];
+
+#if LIBTORRENT_VERSION_MAJOR > 1
+        auto hashes = [[TorrentHashes alloc] initWith: th.info_hashes()];
+#else
+        auto hashes = [[TorrentHashes alloc] initWith: th.info_hash()];
+#endif
+        auto torrentHandle = _torrentsMap[hashes];
+        if (torrentHandle.isFirstLastPiecePriority) {
+            [torrentHandle applyPriorityConfiguration];
+        }
     }
 }
 
@@ -529,6 +539,8 @@ static NSString *FileEntriesQueueIdentifier = @"ru.xitrix.TorrentKit.Session.fil
             }
         }
     }
+
+    rd["first_last_piece_priority"] = torrentHandle.isFirstLastPiecePriority ? 1 : 0;
 
     bencode(std::back_inserter(ret), rd);
 
